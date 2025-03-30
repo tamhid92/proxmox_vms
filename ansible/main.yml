@@ -1,0 +1,33 @@
+---
+- name: Create Servers
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Run Terraform locally
+    import_tasks: tasks/terraform-stuff.yml
+    delegate_to: 127.0.0.1
+
+  - name: Get VMID
+    shell: |
+      qm list | grep "{{ vm_name }}" | awk '{split($0,a," "); print a[1]}'
+    register: vmid
+
+  - name: VMID
+    debug:
+      msg: "{{ vmid.stdout }}"
+  
+  - name: Get VM IP address
+    shell: |
+       qm guest cmd {{ vmid.stdout }} network-get-interfaces | jq  '.[1] | ."ip-addresses" | .[0] | ."ip-address"' | tr -d '"'
+    register: vm_ip
+  
+  - name: VM_IP
+    debug:
+      msg: "{{ vm_ip.stdout }}"
+
+  - name: Create New VM Host File
+    template:
+      src: templates/new_vm_host.ini.j2
+      dest: "{{ playbook_dir }}/hosts/new_vm_host.ini"
+    delegate_to: 127.0.0.1

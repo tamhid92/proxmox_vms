@@ -28,7 +28,7 @@ resource "proxmox_vm_qemu" "new_vm" {
     vm_state = "running"
     scsihw = "virtio-scsi-single"
     agent = 1
-    clone = "vm-image"
+    clone = "vm-image1"
     onboot = true
 
     network {
