@@ -11,12 +11,6 @@ pipeline {
                     sh 'echo ansible-playbook ansible/configure_vm.yml -i ansible/hosts/new_vm_host.ini --extra-vars "vm_name=${NAME}"'
                 }
             }
-            post {
-                always {
-                    echo 'Clean WS'
-                    deleteDir()
-                }
-            }
         }
     }
 }
