@@ -10,10 +10,6 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'proxmox_api', passwordVariable: 'TF_VAR_proxmox_api_token_secret', usernameVariable: 'TF_VAR_proxmox_api_token_id')]) {
                     script{
                         sh "ansible-playbook ansible/main.yml -i ansible/hosts/host.ini --extra-vars \"vm_name='${NAME}' vm_size='${SIZE}' tf_op='${OPERATION}'\""
-                        if (${OPERATION} == 'apply') {
-                            sh "export ANSIBLE_HOST_KEY_CHECKING=False"
-                            sh "ansible-playbook ansible/configure_vm.yml -i ansible/hosts/new_vm_host.ini --extra-vars \"vm_name='${NAME}'\""
-                        }
                     }
                 }
             }

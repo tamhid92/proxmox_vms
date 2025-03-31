@@ -1,6 +1,6 @@
 ---
 - name: Manage Servers
-  hosts: all
+  hosts: pve
   become: yes
 
   tasks:
@@ -23,14 +23,63 @@
     debug:
       msg: "{{ vm_ip.stdout }}"
 
-  - name: Run Terraform destroy
-    import_tasks: tasks/terraform-destroy.yml
+  - name: Add host to group VM
+    ansible.builtin.add_host:
+      name: '{{ vm_ip.stdout }}'
+      groups: VM
+      ansible_ssh_user: "tamhid"
+      ansible_ssh_private_key_file: "/home/tamhid/.ssh/id_ecdsa"
+
+
+- name: Configure VM Server
+  hosts: VM
+  become: yes
+
+  tasks:
+  - name: Create TFBACUP Folder
+    ansible.builtin.file:
+      path: "/home/TF_FILES"
+      state: directory
+    when: tf_op == 'apply'
+  - name: Copy Terraform Folder
+    copy:
+      src: "{{ playbook_dir }}/../{{ vm_name }}/"
+      dest: /home/TF_FILES/
+    when: tf_op == 'apply'
+  - name: Change hostname
+    hostname:
+      name: "{{ vm_name }}"
+    when: tf_op == 'apply'
+  - name: Reboot VM
+    reboot:
+    when: tf_op == 'apply'
+  
+  - name: Create a VM folder
+    ansible.builtin.file:
+      path: "{{ playbook_dir }}/../{{ vm_name }}"
+      state: directory
+    delegate_to: 127.0.0.1
+    when: tf_op == 'destroy'
+  - name: Fetch all files from remote directory
+    synchronize:
+      src: "/home/TF_FILES"
+      dest: "{{ playbook_dir }}/../{{ vm_name }}/"
+      mode: pull
+    when: tf_op == 'destroy'
+  - name: Terraform destroy
+    command:
+      chdir: "{{ playbook_dir }}/../{{ vm_name }}/TF_FILES/"
+      cmd: "terraform destroy -auto-approve"
+    environment:
+      TF_VAR_proxmox_api_token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
+      TF_VAR_proxmox_api_token_secret: "{{ lookup('env', 'TF_VAR_proxmox_api_token_secret') }}"
+    register: terraform_destroy
     delegate_to: 127.0.0.1
     when: tf_op == 'destroy'
 
-  - name: Create New VM Host File
-    template:
-      src: templates/new_vm_host.ini.j2
-      dest: "{{ playbook_dir }}/hosts/new_vm_host.ini"
+  - name: Terraform apply output
+    debug:
+      msg: "{{ terraform_destroy }}"
     delegate_to: 127.0.0.1
-    when: tf_op == 'apply'
+    when: tf_op == 'destroy'
+
