@@ -35,9 +35,6 @@
   hosts: VM
   become: yes
 
-  environment:
-    ANSIBLE_HOST_KEY_CHECKING:False
-
   tasks:
   - name: Create TFBACUP Folder
     ansible.builtin.file:
@@ -68,6 +65,7 @@
       src: "/home/TF_FILES"
       dest: "{{ playbook_dir }}/../{{ vm_name }}/"
       mode: pull
+      owner: true
     when: tf_op == 'destroy'
   - name: Terraform destroy
     command:
