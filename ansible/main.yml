@@ -77,7 +77,7 @@
     when: tf_op == 'destroy'
   - name: Terraform destroy
     command:
-      chdir: "{{ playbook_dir }}/../{{ vm_name }}/TF_FILES/"
+      chdir: "{{ playbook_dir }}/../{{ vm_name }}/"
       cmd: "terraform destroy -auto-approve -lock=false"
     environment:
       TF_VAR_proxmox_api_token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
