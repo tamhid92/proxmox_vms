@@ -1,0 +1,4 @@
+hvac
+flask
+paramiko
+psycopg2-binary
