@@ -1,7 +1,4 @@
 ---
-- name: Debug playbook dir
-  debug:
-    msg: "{{ playbook_dir }}"
 - name: Create a VM folder
   ansible.builtin.file:
     path: "{{ playbook_dir }}/../{{ vm_name }}"

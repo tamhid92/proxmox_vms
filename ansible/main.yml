@@ -1,21 +1,18 @@
 ---
-- name: Create Servers
+- name: Manage Servers
   hosts: all
   become: yes
 
   tasks:
-  - name: Run Terraform locally
-    import_tasks: tasks/terraform-stuff.yml
+  - name: Run Terraform apply
+    import_tasks: tasks/terraform-apply.yml
     delegate_to: 127.0.0.1
+    when: tf_op == 'apply'
 
   - name: Get VMID
     shell: |
       qm list | grep "{{ vm_name }}" | awk '{split($0,a," "); print a[1]}'
     register: vmid
-
-  - name: VMID
-    debug:
-      msg: "{{ vmid.stdout }}"
   
   - name: Get VM IP address
     shell: |
@@ -26,8 +23,14 @@
     debug:
       msg: "{{ vm_ip.stdout }}"
 
+  - name: Run Terraform destroy
+    import_tasks: tasks/terraform-destroy.yml
+    delegate_to: 127.0.0.1
+    when: tf_op == 'destroy'
+
   - name: Create New VM Host File
     template:
       src: templates/new_vm_host.ini.j2
       dest: "{{ playbook_dir }}/hosts/new_vm_host.ini"
     delegate_to: 127.0.0.1
+    when: tf_op == 'apply'
