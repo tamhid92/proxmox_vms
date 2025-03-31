@@ -45,6 +45,9 @@
     copy:
       src: "{{ playbook_dir }}/../{{ vm_name }}/"
       dest: /home/TF_FILES/
+      owner: tamhid
+      group: tamhid
+      mode: '0644'
     when: tf_op == 'apply'
   - name: Change hostname
     hostname:
