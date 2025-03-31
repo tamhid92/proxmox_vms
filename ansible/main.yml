@@ -35,6 +35,9 @@
   hosts: VM
   become: yes
 
+  environment:
+    ANSIBLE_HOST_KEY_CHECKING:False
+
   tasks:
   - name: Create TFBACUP Folder
     ansible.builtin.file:
@@ -69,7 +72,7 @@
   - name: Terraform destroy
     command:
       chdir: "{{ playbook_dir }}/../{{ vm_name }}/TF_FILES/"
-      cmd: "terraform destroy -auto-approve"
+      cmd: "terraform destroy -auto-approve -lock=false"
     environment:
       TF_VAR_proxmox_api_token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
       TF_VAR_proxmox_api_token_secret: "{{ lookup('env', 'TF_VAR_proxmox_api_token_secret') }}"
