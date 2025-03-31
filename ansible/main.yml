@@ -64,6 +64,7 @@
     fetch:
       src: "/home/TF_FILES/{{ item }}"
       dest: "{{ playbook_dir }}/../{{ vm_name }}"
+      flat: yes
     loop:
       - provider.tf
       - terraform.tfstate
