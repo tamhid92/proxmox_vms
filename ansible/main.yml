@@ -61,11 +61,12 @@
     delegate_to: 127.0.0.1
     when: tf_op == 'destroy'
   - name: Fetch all files from remote directory
-    synchronize:
-      src: "/home/TF_FILES"
+    fetch:
+      src: "/home/TF_FILES/{{ item }}"
       dest: "{{ playbook_dir }}/../{{ vm_name }}/"
-      mode: pull
-      owner: true
+    loop:
+      - provider.tf
+      - terraform.tfstate
     when: tf_op == 'destroy'
   - name: Terraform destroy
     command:
