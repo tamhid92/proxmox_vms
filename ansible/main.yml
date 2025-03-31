@@ -47,7 +47,7 @@
       dest: /home/TF_FILES/
       owner: tamhid
       group: tamhid
-      mode: '0644'
+      mode: '777'
     when: tf_op == 'apply'
   - name: Change hostname
     hostname:
@@ -60,6 +60,9 @@
   - name: Create a VM folder
     ansible.builtin.file:
       path: "{{ playbook_dir }}/../{{ vm_name }}"
+      owner: "{{ hostvars['VM'].ansible_ssh_user }}"
+      group: "{{ hostvars['VM'].ansible_ssh_user }}"
+      mode: '0777'
       state: directory
     delegate_to: 127.0.0.1
     when: tf_op == 'destroy'
