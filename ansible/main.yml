@@ -73,10 +73,17 @@
       mode: pull
       owner: true
     when: tf_op == 'destroy'
+  - name: Whoami
+    shell: |
+      whoami
+    register: who
+  - name: whoami debug
+    debug:
+      msg: "{{ who.stdout }}"
   - name: Terraform destroy
     command:
       chdir: "{{ playbook_dir }}/../{{ vm_name }}/TF_FILES/"
-      cmd: "sudo terraform destroy -auto-approve -lock=false"
+      cmd: "terraform destroy -auto-approve -lock=false"
     environment:
       TF_VAR_proxmox_api_token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
       TF_VAR_proxmox_api_token_secret: "{{ lookup('env', 'TF_VAR_proxmox_api_token_secret') }}"
