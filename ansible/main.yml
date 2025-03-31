@@ -63,7 +63,7 @@
   - name: Fetch all files from remote directory
     fetch:
       src: "/home/TF_FILES/{{ item }}"
-      dest: "{{ playbook_dir }}/../{{ vm_name }}/"
+      dest: "{{ playbook_dir }}/../{{ vm_name }}"
     loop:
       - provider.tf
       - terraform.tfstate
