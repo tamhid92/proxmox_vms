@@ -67,17 +67,15 @@
     delegate_to: 127.0.0.1
     when: tf_op == 'destroy'
   - name: Fetch all files from remote directory
-    fetch:
-      src: "/home/TF_FILES/{{ item }}"
+    synchronize:
+      src: "/home/TF_FILES"
       dest: "{{ playbook_dir }}/../{{ vm_name }}/"
-      flat: yes
-    loop:
-      - provider.tf
-      - terraform.tfstate
+      mode: pull
+      owner: true
     when: tf_op == 'destroy'
   - name: Terraform destroy
     command:
-      chdir: "{{ playbook_dir }}/../{{ vm_name }}/"
+      chdir: "{{ playbook_dir }}/../{{ vm_name }}/TF_FILES/"
       cmd: "terraform destroy -auto-approve -lock=false"
     environment:
       TF_VAR_proxmox_api_token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
