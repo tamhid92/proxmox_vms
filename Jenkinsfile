@@ -5,7 +5,7 @@ pipeline {
     agent none
     stages {
         stage('Check VM Status') {
-            agent {label 'linux'}
+            agent {label 'temp-linux'}
             steps{
                 withCredentials([usernamePassword(credentialsId: 'proxmox_api', passwordVariable: 'TF_VAR_proxmox_api_token_secret', usernameVariable: 'TF_VAR_proxmox_api_token_id')]) {
                     script{
