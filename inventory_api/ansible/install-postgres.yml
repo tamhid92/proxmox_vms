@@ -1,6 +1,6 @@
 ---
 - name: Configure Server
-  hosts: all
+  hosts: db-server
   become: yes
 
   tasks:

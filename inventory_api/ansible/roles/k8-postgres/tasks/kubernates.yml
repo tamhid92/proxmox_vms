@@ -7,7 +7,7 @@
 - name: Create if ~/.config doesn't exist
   file:
     path: "~/.config"
-    state: touch
+    state: directory
   when: not folder.stat.exists
 
 - name: Create PIP config
@@ -35,7 +35,7 @@
     src: "{{ item }}"
     dest: "/home/tamhid/ansible"
   with_fileglob:
-    - "/files/*"
+    - "files/*"
 
 - name: Login to Vault
   community.hashi_vault.vault_kv2_get:
