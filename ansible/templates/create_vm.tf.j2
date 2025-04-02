@@ -3,17 +3,17 @@ locals {
     "small" = {
       cores   = 2
       memory  = 2048
-      disk    = "20G"
+      disk    = "50G"
     }
     "medium" = {
       cores   = 4
       memory  = 4096
-      disk    = "40G"
+      disk    = "50G"
     }
     "large" = {
       cores   = 4
       memory  = 8192
-      disk    = "80G"
+      disk    = "50G"
     }
   }
 }
@@ -28,7 +28,7 @@ resource "proxmox_vm_qemu" "new_vm" {
     vm_state = "running"
     scsihw = "virtio-scsi-single"
     agent = 1
-    clone = "vm-image1"
+    clone = "base-image"
     onboot = true
 
     network {
@@ -55,7 +55,7 @@ resource "proxmox_vm_qemu" "new_vm" {
     #     }
     # }
     disk {
-      slot = "scsi0"
+      slot = "virtio0"
       storage = "local-lvm"
       size = local.size["{{vm_size}}"].disk
       backup = false
