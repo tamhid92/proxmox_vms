@@ -6,14 +6,7 @@ app = Flask(__name__)
 
 def get_db_connection():
     try:
-        vault_client = HVACClient()
-        db_creds = vault_client.read('secret/data/postgres')
-        for k,v in db_creds.items():
-            db_user = k
-            db_pass = v
-    except:
-        print("Unable to get value from Vault")
-    try:
+        db_user, db_pass = get_vault('secret/data/postgres')
         conn = psycopg2.connect(
             host="192.168.68.62",
             port=30384,
@@ -26,6 +19,17 @@ def get_db_connection():
         print(f"Error connecting to the database: {e}")
         return None
 
+def get_vault(vault_path):
+    try:
+        vault_client = HVACClient()
+        db_creds = vault_client.read(vault_path)
+        for k,v in db_creds.items():
+            user = k
+            pwd = v
+        
+        return user, pwd
+    except:
+        print("Unable to get value from Vault")
 
 @app.route('/', methods=['GET'])
 def home():

@@ -1,0 +1,74 @@
+---
+- hosts: apphost
+
+  tasks:
+  - name: Create ansible folder
+    file:
+      path: '/home/{{ ansible_ssh_user }}/ansible'
+      state: directory
+    tags: run
+  - name: Create application folder
+    file:
+      path: '/home/{{ ansible_ssh_user }}/ansible/{{ app_name }}'
+      state: directory
+    tags: run
+  - name: Copy all K8 manifest files
+    ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: "/home/{{ ansible_ssh_user }}/ansible/{{ app_name }}"
+    with_fileglob:
+      - "../docker_apps/{{ app_name }}/*"
+    tags: run
+
+  - name: Build Docker Image
+    community.docker.docker_image:
+      name: "{{ app_name }}"
+      build:
+        path: /home/{{ ansible_ssh_user }}/ansible/{{ app_name }}/
+      source: build
+    tags: run
+
+  - name: Run Docker Container
+    community.docker.docker_container:
+      name: "{{ app_name }}"
+      image: "{{ app_name }}"
+      state: started
+      restart_policy: always
+      ports:
+        - "{{ app_port }}:5000"
+      detach: true
+      env:
+        VAULT_TOKEN: "{{ lookup('env', 'VAULT_TOKEN') }}"
+    tags: run
+  
+  - name: Login to Vault
+    community.hashi_vault.vault_kv2_get:
+      url: "{{ lookup('env', 'VAULT_ADDR') }}"
+      engine_mount_point: secret
+      path: cloudflare_api_token
+      auth_method: token
+    environment:
+      VAULT_TOKEN: "{{ lookup('env', 'VAULT_TOKEN') }}"
+    register: response
+
+  - name: Create a record using api token
+    community.general.cloudflare_dns:
+      zone: tchowdhury.org
+      record: inventory
+      type: A
+      value: 192.168.68.77
+      api_token: "{{ item.value }}"
+    with_dict: "{{ response.secret }}"
+    tags: run
+
+  - name: Stop and Remove Docker Container
+    community.docker.docker_container:
+      name: "{{ app_name }}"
+      state: absent
+    tags: remove
+
+  - name: Remove Docker Image
+    community.docker.docker_image:
+      name: "{{ app_name }}"
+      state: absent
+    tags: remove
