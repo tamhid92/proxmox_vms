@@ -1,3 +1,4 @@
+def NODE = "${params.NODE}"
 def NAME = "${params.VM_NAME}"
 def SIZE = "${params.VM_SIZE}"
 def OPERATION = "${params.OPERATION}"
@@ -5,7 +6,7 @@ pipeline {
     agent none
     stages {
         stage('Check VM Status') {
-            agent {label 'temp-linux'}
+            agent {label "'${NODE}'"}
             steps{
                 withCredentials([usernamePassword(credentialsId: 'proxmox_api', passwordVariable: 'TF_VAR_proxmox_api_token_secret', usernameVariable: 'TF_VAR_proxmox_api_token_id')]) {
                     script{

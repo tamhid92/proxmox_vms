@@ -2,13 +2,12 @@
 - name: Configure Server
   hosts: all
   become: yes
-  roles:
-    - docker
 
   tasks:
-  - name: Install Microk8s
-    community.general.snap:
-      name: microk8s
-      classic: true
+  - name: Install Docker
+    import_role:
+      name: docker
+
   - name: Install Postgres
-    import_tasks: tasks/kubernates.yml
+    import_role:
+      name: k8-postgres

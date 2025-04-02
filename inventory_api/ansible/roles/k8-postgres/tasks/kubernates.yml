@@ -39,7 +39,7 @@
 
 - name: Login to Vault
   community.hashi_vault.vault_kv2_get:
-    url: http://192.168.68.77:8200/
+    url: "{{ lookup('env', 'VAULT_ADDR') }}"
     engine_mount_point: secret
     path: postgres
     auth_method: token
