@@ -1,3 +1,0 @@
-hvac
-flask
-psycopg2-binary

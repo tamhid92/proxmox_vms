@@ -15,8 +15,8 @@ def get_db_connection():
         print("Unable to get value from Vault")
     try:
         conn = psycopg2.connect(
-            host="192.168.68.81",
-            port=30482,
+            host="192.168.68.62",
+            port=30384,
             database="postgres",
             user=db_user,
             password=db_pass

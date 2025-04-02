@@ -1,5 +1,6 @@
 import paramiko
-import json, psycopg2
+import paramiko.pkey
+import json, psycopg2, io
 from hvac_lib import HVACClient
 
 def get_running_vms_qemu_agent(proxmox_host, proxmox_user, proxmox_key):
@@ -54,18 +55,13 @@ def get_running_vms_qemu_agent(proxmox_host, proxmox_user, proxmox_key):
           ssh.close()
 
 def get_db_connection():
-    try:
-        vault_client = HVACClient()
-        db_creds = vault_client.read('secret/data/postgres')
-        for k,v in db_creds.items():
-            db_user = k
-            db_pass = v
-    except:
-        print("Unable to get value from Vault")
+
+    db_user, db_pass = get_vault('secret/data/postgres')
+    
     try:
         conn = psycopg2.connect(
-            host="192.168.68.81",
-            port=30482,
+            host="192.168.68.62",
+            port=30384,
             database="postgres",
             user=db_user,
             password=db_pass
@@ -75,6 +71,16 @@ def get_db_connection():
         print(f"Error connecting to the database: {e}")
         return None
 
+def get_vault(path):
+    try:
+        vault_client = HVACClient()
+        db_creds = vault_client.read(path)
+        for k,v in db_creds.items():
+            user = k
+            pwd = v
+    except:
+        print("Unable to connect to vault")
+    return user, pwd
 
 def populate_db(data):
     conn = get_db_connection()
@@ -103,7 +109,7 @@ def main():
 
     proxmox_host = "192.168.68.79"
     proxmox_user = "root"
-    proxmox_key = '/home/tamhid/.ssh/id_ecdsa'
+    proxmox_key = "C:\\Users\\tamhi\\.ssh\\id_ecdsa.pub"
     running_vms = get_running_vms_qemu_agent(proxmox_host, proxmox_user, proxmox_key)
 
     populate_db(running_vms)
