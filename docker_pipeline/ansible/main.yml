@@ -1,5 +1,6 @@
 ---
-- hosts: apphost
+- name: Deploy Application
+  hosts: apphost
 
   tasks:
   - name: Create ansible folder
@@ -12,7 +13,7 @@
       path: '/home/{{ ansible_ssh_user }}/ansible/{{ app_name }}'
       state: directory
     tags: run
-  - name: Copy all K8 manifest files
+  - name: Copy all application files
     ansible.builtin.copy:
       src: "{{ item }}"
       dest: "/home/{{ ansible_ssh_user }}/ansible/{{ app_name }}"
@@ -72,3 +73,39 @@
       name: "{{ app_name }}"
       state: absent
     tags: remove
+
+- name: Make RP changes
+  hosts: reverse-proxy
+  become: yes
+
+  tasks:
+  - name: Create ansible folder
+    file:
+      path: '/home/{{ ansible_ssh_user }}/ansible'
+      state: directory
+    tags: run
+
+  - name: Template python vars file
+    template:
+      src: 'templates/app_vars.json.j2'
+      dest: 'python/app_vars.json'
+    tags: run
+  
+  - name: Copy files to RP
+    copy:
+      src: '{{ item }}'
+      dest: '/home/{{ ansible_ssh_user }}'
+    loop:
+      - 'python/update_rp.py'
+      - 'python/app_vars.json'
+    tags: run
+  
+  - name: Run Python Script to update nginix
+    shell: |
+      python3 /home/{{ ansible_ssh_user }}/ansible/update_rp.py
+    tags: run
+  
+  - name: Restart nginix docker container
+    community.docker.docker_container:
+      name: "nginix_app_1"
+      restart: true
