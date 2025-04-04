@@ -1,7 +1,8 @@
-import sqlite3, datetime, json
+import sqlite3, datetime, json,  os
 from jinja2 import Environment, FileSystemLoader
 
-with open('../templates/app_vars.json', 'r') as file:
+
+with open('/home/tamhid/ansible/app_vars.json', 'r') as file:
     data = json.loads(file.read())
 
 # data = {
@@ -10,7 +11,7 @@ with open('../templates/app_vars.json', 'r') as file:
 #     "app_name" : "inventory"
 # }
 
-conn = sqlite3.connect("database.sqlite")
+conn = sqlite3.connect("/home/tamhid/ansible/database.sqlite")
 cursor = conn.cursor()
 
 id_cmd = """
@@ -41,12 +42,12 @@ for record in records:
 conn.close()
 
 
-env = Environment(loader=FileSystemLoader('../templates/'))
+env = Environment(loader=FileSystemLoader('/home/tamhid/ansible/'))
 template = env.get_template('nginix-conf.conf.j2')
 
 content = template.render(data)
 
-with open('8.conf', 'w') as file:
+with open(f'/home/tamhid/ansible/{id_}.conf', 'w') as file:
     file.write(content)
 
-print(f"Filled template")
+print(f"created conf file {id_}.conf")
