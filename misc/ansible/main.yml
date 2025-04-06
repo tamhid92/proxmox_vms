@@ -1,0 +1,43 @@
+---
+- name: Configure AppHost Server
+  hosts: all
+
+  tasks:
+  # - name: Install Kubectl
+  #   shell: |
+  #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  #     sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  
+  # - name: Install Helm
+  #   shell: |
+  #     curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+  #     chmod 700 get_helm.sh
+  #     ./get_helm.sh
+  
+  # - name: Install MiniKube
+  #   shell: |
+  #     curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+  #     sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+  
+  # - name: Update APT
+  #   apt:
+  #     state: present
+  
+  - name: Install Packages
+    apt:
+      pkg:
+        - curl
+        - python3
+        - python3-pip
+        - qemu-guest-agent
+    become: yes
+  
+  # - name: Install Jenkins
+  #   shell: |
+  #     sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian/jenkins.io-2023.key
+  #     echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+  #     sudo apt-get update
+  #     sudo apt-get -y install jenkins
+  
+  - name: Deploy Postgres on K8s
+    import_tasks: tasks/kubernates.yml
